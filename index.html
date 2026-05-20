@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>for michele ✿</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════
+       PAGE 1 — Secret Petal Note
+  ════════════════════════════════════════════════════ -->
+  <div id="page1" class="page active">
+
+    <!-- Animated background petal field -->
+    <div id="petal-field" class="petal-field" aria-hidden="true"></div>
+
+    <div class="note-wrapper">
+
+      <!-- Crumpled paper note -->
+      <div id="note" class="note-paper">
+
+        <!-- Tiny lily illustration in top-right corner of note -->
+        <svg class="note-lily" width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <ellipse cx="18" cy="18" rx="4"   ry="11"  fill="#F2B5C0" transform="rotate(0   18 18)" opacity="0.9"/>
+          <ellipse cx="18" cy="18" rx="4"   ry="11"  fill="#C9A0B0" transform="rotate(60  18 18)" opacity="0.9"/>
+          <ellipse cx="18" cy="18" rx="4"   ry="11"  fill="#F2B5C0" transform="rotate(120 18 18)" opacity="0.9"/>
+          <circle  cx="18" cy="18" r="3.2"  fill="#C9A0B0"/>
+          <line x1="18" y1="15" x2="12" y2="6"  stroke="#A8B89A" stroke-width="1.2"/>
+          <line x1="18" y1="15" x2="24" y2="6"  stroke="#A8B89A" stroke-width="1.2"/>
+          <line x1="18" y1="15" x2="18" y2="4"  stroke="#A8B89A" stroke-width="1.2"/>
+          <circle cx="12" cy="6"  r="1.6" fill="#A8B89A"/>
+          <circle cx="24" cy="6"  r="1.6" fill="#A8B89A"/>
+          <circle cx="18" cy="4"  r="1.6" fill="#A8B89A"/>
+        </svg>
+
+        <!-- Small gomphrena bottom-left -->
+        <svg class="note-gomphrena" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="8"   fill="#C9A0B0" opacity="0.35"/>
+          <circle cx="12" cy="12" r="5.5" fill="#F2B5C0" opacity="0.55"/>
+          <circle cx="12" cy="12" r="3"   fill="#C9A0B0" opacity="0.6"/>
+          <circle cx="7"  cy="8"  r="2"   fill="#F2B5C0" opacity="0.45"/>
+          <circle cx="17" cy="8"  r="2"   fill="#C9A0B0" opacity="0.45"/>
+          <circle cx="7"  cy="16" r="2"   fill="#C9A0B0" opacity="0.45"/>
+          <circle cx="17" cy="16" r="2"   fill="#F2B5C0" opacity="0.45"/>
+        </svg>
+
+        <p class="note-text">what do you think<br>the number is? :)</p>
+        <p class="note-subtext">enter your guess below</p>
+      </div>
+
+      <!-- 4-digit PIN input -->
+      <div class="pin-row" role="group" aria-label="Enter 4-digit PIN">
+        <input class="pin-box" id="p0" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="First digit">
+        <input class="pin-box" id="p1" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Second digit">
+        <input class="pin-box" id="p2" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Third digit">
+        <input class="pin-box" id="p3" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Fourth digit">
+      </div>
+
+      <p class="pin-hint" id="pin-hint">✦ tap a digit to begin ✦</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       PAGE 2 — Developing Polaroid
+  ════════════════════════════════════════════════════ -->
+  <div id="page2" class="page">
+
+    <div id="petal-field-2" class="petal-field" aria-hidden="true"></div>
+
+    <div class="polaroid-scene">
+
+      <!-- Tap / click anywhere on the frame to develop -->
+      <div class="polaroid-frame" id="polaroid-frame"
+           role="button" tabindex="0" aria-label="Tap to develop the photo">
+
+        <div class="polaroid-window">
+          <!-- Filter applied to this div so blur is clipped by overflow:hidden -->
+          <div class="polaroid-content" id="polaroid-content">
+            <img src="[POLAROID_PLACEHOLDER_IMAGE]"
+                 class="polaroid-photo" alt=""
+                 onerror="this.style.display='none'">
+          </div>
+        </div>
+
+        <!-- Classic wide white bottom strip -->
+        <div class="polaroid-strip"></div>
+      </div>
+
+      <p class="tap-develop-hint" id="tap-develop-hint">tap to develop ✦</p>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       PAGE 3 — placeholder (built in Step 3)
+  ════════════════════════════════════════════════════ -->
+  <div id="page3" class="page"></div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>

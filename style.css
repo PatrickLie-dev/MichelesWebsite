@@ -1,0 +1,400 @@
+/* ════════════════════════════════════════════════════════════════
+   Design Tokens
+════════════════════════════════════════════════════════════════ */
+:root {
+  --cream:        #FAF3E8;
+  --blush:        #F2B5C0;
+  --mauve:        #C9A0B0;
+  --sage:         #A8B89A;
+  --brown:        #6B4C3B;
+  --brown-mid:    #9B7B6B;
+  --brown-faint:  rgba(107, 76, 59, 0.07);
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Cormorant Garamond', Georgia, serif;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Reset & Base
+════════════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--cream);
+  font-family: var(--font-body);
+  color: var(--brown);
+  -webkit-font-smoothing: antialiased;
+  touch-action: manipulation;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Page System
+════════════════════════════════════════════════════════════════ */
+.page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.75s ease;
+}
+
+.page.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Floating Petal Field  (Page 1 background)
+════════════════════════════════════════════════════════════════ */
+.petal-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes drift {
+  0% {
+    transform: translateY(-40px) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  8%  { opacity: var(--op, 0.6); }
+  90% { opacity: calc(var(--op, 0.6) * 0.55); }
+  100% {
+    transform: translateY(112vh) translateX(var(--dx, 18px)) rotate(var(--spin, 200deg));
+    opacity: 0;
+  }
+}
+
+/* Generic floating petal element created by JS */
+.fp {
+  position: absolute;
+  top: -40px;
+  left: var(--left, 50%);
+  width:  var(--w, 9px);
+  height: var(--h, 18px);
+  background: var(--color, #F2B5C0);
+  border-radius: var(--br, 50% 50% 50% 0);
+  animation: drift var(--dur, 12s) var(--delay, 0s) linear infinite;
+  will-change: transform, opacity;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Note Wrapper
+════════════════════════════════════════════════════════════════ */
+.note-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Crumpled Note
+════════════════════════════════════════════════════════════════ */
+.note-paper {
+  position: relative;
+  width: min(308px, 86vw);
+  padding: 36px 28px 28px;
+  background-color: #FFF8EE;
+
+  /* Ruled-paper lines */
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 28px,
+      rgba(107, 76, 59, 0.055) 28px,
+      rgba(107, 76, 59, 0.055) 29px
+    );
+
+  /* Slightly irregular corners for hand-torn feel */
+  border-radius: 4px 14px 7px 6px;
+  transform: rotate(-1.6deg);
+
+  /* Layered shadows for crumpled depth */
+  box-shadow:
+    1px 2px 0   rgba(107, 76, 59, 0.05),
+    3px 5px 0   rgba(107, 76, 59, 0.035),
+    7px 12px 28px rgba(107, 76, 59, 0.14),
+    inset 0 0 50px rgba(107, 76, 59, 0.018);
+
+  user-select: none;
+}
+
+/* Washi tape at top */
+.note-paper::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%) rotate(1.2deg);
+  width: 66px;
+  height: 22px;
+  background: rgba(242, 181, 192, 0.52);
+  border-radius: 2px;
+  /* Subtle washi texture */
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 6px,
+    rgba(255,255,255,0.2) 6px,
+    rgba(255,255,255,0.2) 7px
+  );
+}
+
+/* Folded corner — bottom right */
+.note-paper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(
+    to top left,
+    var(--cream) 50%,
+    rgba(107, 76, 59, 0.13) 50%
+  );
+  border-radius: 0 0 7px 0;
+}
+
+/* Small decorative lily — top-right inside note */
+.note-lily {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  opacity: 0.38;
+}
+
+/* Gomphrena — bottom-left inside note */
+.note-gomphrena {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  opacity: 0.35;
+}
+
+.note-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.15rem, 4.8vw, 1.35rem);
+  line-height: 1.8;
+  color: var(--brown);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  margin-top: 2px;
+}
+
+.note-subtext {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--brown-mid);
+  text-align: center;
+  margin-top: 10px;
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+/* Shake animation on wrong PIN */
+@keyframes shake {
+  0%, 100% { transform: rotate(-1.6deg) translateX(0); }
+  20%       { transform: rotate(-1.6deg) translateX(-9px); }
+  40%       { transform: rotate(-1.6deg) translateX(9px); }
+  60%       { transform: rotate(-1.6deg) translateX(-6px); }
+  80%       { transform: rotate(-1.6deg) translateX(5px); }
+}
+
+.note-paper.shaking {
+  animation: shake 0.45s ease;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PIN Row
+════════════════════════════════════════════════════════════════ */
+.pin-row {
+  display: flex;
+  gap: 14px;
+}
+
+.pin-box {
+  width: 52px;
+  height: 60px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(107, 76, 59, 0.2);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  color: var(--brown);
+  outline: none;
+  caret-color: transparent;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.25s ease;
+  user-select: none;
+}
+
+.pin-box:focus {
+  border-bottom-color: var(--blush);
+}
+
+.pin-box.filled {
+  border-bottom-color: var(--mauve);
+}
+
+.pin-box.wrong {
+  border-bottom-color: #D08060;  /* warm terracotta — not harsh red */
+}
+
+.pin-box:disabled {
+  opacity: 0.55;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PIN Hint
+════════════════════════════════════════════════════════════════ */
+.pin-hint {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--mauve);
+  letter-spacing: 0.07em;
+  animation: hintPulse 2.6s ease infinite;
+  user-select: none;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 1; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Burst Petals  (created by JS on correct PIN)
+════════════════════════════════════════════════════════════════ */
+.burst-petal {
+  position: fixed;
+  pointer-events: none;
+  z-index: 200;
+  will-change: transform, opacity;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   PAGE 2 — Developing Polaroid
+════════════════════════════════════════════════════════════════ */
+
+.polaroid-scene {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* Outer polaroid frame */
+.polaroid-frame {
+  width: min(272px, 78vw);
+  background: #FFFEF9;
+  padding: 10px 10px 0;
+  box-shadow:
+    0 2px 4px   rgba(107, 76, 59, 0.07),
+    0 8px 24px  rgba(107, 76, 59, 0.14),
+    0 24px 56px rgba(107, 76, 59, 0.10);
+  transform: rotate(1.4deg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  /* Gentle float inviting the tap */
+  animation: polaroidFloat 3.8s ease-in-out infinite;
+}
+
+@keyframes polaroidFloat {
+  0%, 100% { transform: rotate(1.4deg) translateY(0px); }
+  50%       { transform: rotate(1.4deg) translateY(-7px); }
+}
+
+/* Stop float + subtle press on active tap */
+.polaroid-frame:active {
+  transform: rotate(1.4deg) scale(0.975) !important;
+  animation-play-state: paused;
+}
+
+.polaroid-frame.developing {
+  animation: none;
+  transform: rotate(1.4deg);
+  pointer-events: none;
+}
+
+/* Square photo window — overflow:hidden clips the blur */
+.polaroid-window {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Content layer — filter applied here, not on the window */
+.polaroid-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* Gradient visible as placeholder, and warm tone before develop */
+  background: linear-gradient(145deg, #EDD5CC 0%, #D8BFD0 52%, #C8D6BE 100%);
+  filter: blur(14px) brightness(0.64) saturate(0.16) contrast(0.88);
+  transition: filter 2.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: filter;
+}
+
+.polaroid-content.developed {
+  filter: blur(0px) brightness(1) saturate(1) contrast(1);
+}
+
+.polaroid-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Classic wide white bottom strip */
+.polaroid-strip {
+  height: 46px;
+  background: linear-gradient(to bottom, #FFFEF9, #FFF9F2);
+}
+
+/* "tap to develop" hint */
+.tap-develop-hint {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--mauve);
+  letter-spacing: 0.06em;
+  animation: hintPulse 2.4s ease infinite;
+  user-select: none;
+  transition: opacity 0.55s ease;
+}
+
+.tap-develop-hint.hidden {
+  opacity: 0;
+  animation: none;
+}
