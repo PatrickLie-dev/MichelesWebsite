@@ -398,3 +398,460 @@ html, body {
   opacity: 0;
   animation: none;
 }
+
+
+/* ════════════════════════════════════════════════════════════════
+   PAGE 3 — Flower Bloom Transition
+════════════════════════════════════════════════════════════════ */
+
+/* Full-screen stage; overflow:hidden keeps edge-flying elements clipped */
+.bloom-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Shared base for every bloom element (position + will-change set in JS) */
+.bloom-el {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   PAGE 4 — Scroll Journey
+════════════════════════════════════════════════════════════════ */
+
+/* Override .page defaults so page 4 scrolls vertically */
+#page4 {
+  display: block;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  padding-bottom: 110px;
+}
+
+/* ── Tap-to-begin overlay ────────────────────────────────────── */
+.p4-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(250, 243, 232, 0.93);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.p4-overlay-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.55rem;
+  color: var(--brown);
+}
+
+.p4-overlay-sub {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--brown-mid);
+}
+
+.p4-overlay-btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blush), var(--mauve));
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 4px;
+  box-shadow: 0 4px 24px rgba(201, 160, 176, 0.45);
+  animation: beatPulse 1.6s ease infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes beatPulse {
+  0%, 100% { transform: scale(1);     box-shadow: 0 4px 24px rgba(201,160,176,0.45); }
+  50%       { transform: scale(1.09); box-shadow: 0 6px 34px rgba(201,160,176,0.65); }
+}
+
+/* ── Music widget ────────────────────────────────────────────── */
+.music-widget {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: min(318px, 88vw);
+  background: rgba(255, 248, 238, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 18px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow:
+    0 4px 20px rgba(107, 76, 59, 0.1),
+    0 0 0 1px rgba(242, 181, 192, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+.music-widget.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.music-art {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--blush), var(--mauve));
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.music-art img { width: 100%; height: 100%; object-fit: cover; }
+
+.music-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.music-title {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--brown);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-artist {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.76rem;
+  color: var(--brown-mid);
+}
+
+.music-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.eq-bar {
+  display: block;
+  width: 3px;
+  background: var(--blush);
+  border-radius: 2px;
+  transform-origin: bottom;
+  animation: eqPulse 0.72s ease infinite alternate;
+}
+
+.eq-bar:nth-child(1) { height: 7px;  animation-delay: 0s; }
+.eq-bar:nth-child(2) { height: 14px; animation-delay: 0.12s; }
+.eq-bar:nth-child(3) { height: 18px; animation-delay: 0.24s; }
+.eq-bar:nth-child(4) { height: 10px; animation-delay: 0.36s; }
+.eq-bar:nth-child(5) { height: 15px; animation-delay: 0.48s; }
+
+@keyframes eqPulse {
+  0%   { transform: scaleY(0.22); }
+  100% { transform: scaleY(1); }
+}
+
+/* ── Shared section layout ───────────────────────────────────── */
+.p4-section {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px 92px;
+  overflow: hidden;
+}
+
+/* Scroll-triggered fade-up */
+.fade-up {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Section A — Birthday Hero ───────────────────────────────── */
+#s-hero { background: var(--cream); }
+
+.deco-lily {
+  position: absolute;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.deco-left  { left: -10px; top: 50%; transform: translateY(-50%); }
+.deco-right { right: -8px; top: 45%; transform: translateY(-50%); }
+
+.hero-text-wrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.hero-words {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.hero-word {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 12vw, 4rem);
+  font-weight: 700;
+  color: var(--brown);
+  line-height: 1.15;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.hero-word.hero-name {
+  color: var(--mauve);
+  font-style: italic;
+}
+
+.hero-word.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-date {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1.3rem;
+  color: var(--mauve);
+  letter-spacing: 0.2em;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.hero-date.visible { opacity: 1; }
+
+/* ── Section B — Scratch Polaroids ──────────────────────────── */
+#s-scratch {
+  background: linear-gradient(180deg, var(--cream) 0%, #FDF0EC 100%);
+  padding-top: 80px;
+  padding-bottom: 120px;
+}
+
+.section-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--brown);
+  text-align: center;
+  margin-bottom: 36px;
+  position: relative;
+  z-index: 2;
+}
+
+.scratch-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.scratch-polaroid {
+  background: white;
+  padding: 10px 10px 40px;
+  box-shadow: 0 6px 26px rgba(107, 76, 59, 0.14);
+  width: min(248px, 70vw);
+  position: relative;
+}
+
+.scratch-window {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.scratch-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.scratch-canvas {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+  touch-action: none;
+  z-index: 1;
+}
+
+.scratch-label {
+  text-align: center;
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--brown-mid);
+}
+
+/* ── Section C — Love Letter ─────────────────────────────────── */
+#s-letter {
+  background: linear-gradient(180deg, #FDF0EC 0%, var(--cream) 100%);
+}
+
+.letter-card {
+  position: relative;
+  width: min(338px, 92vw);
+  background: #FFFCF7;
+  padding: 50px 30px 38px;
+  border-radius: 4px;
+  overflow: visible;
+  box-shadow:
+    0 8px 40px rgba(107, 76, 59, 0.10),
+    0 0 0 1px rgba(107, 76, 59, 0.05);
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 29px,
+    rgba(107, 76, 59, 0.04) 29px,
+    rgba(107, 76, 59, 0.04) 30px
+  );
+  z-index: 2;
+}
+
+.wax-seal {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.letter-lily {
+  position: absolute;
+  right: -22px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.letter-meta {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.86rem;
+  color: var(--brown-mid);
+  line-height: 1.9;
+  margin-bottom: 22px;
+}
+
+.letter-body {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.95;
+  color: var(--brown);
+  margin-bottom: 26px;
+  white-space: pre-line;
+}
+
+.letter-sign {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--mauve);
+  text-align: right;
+}
+
+/* ── Section D — Memory Map ──────────────────────────────────── */
+#s-map {
+  background: var(--cream);
+  padding-bottom: 140px;
+}
+
+.map-wrap {
+  width: min(358px, 94vw);
+  height: 300px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(107, 76, 59, 0.14);
+  position: relative;
+  z-index: 2;
+}
+
+#memory-map { width: 100%; height: 100%; }
+
+/* Leaflet popup theming */
+.leaflet-popup-content-wrapper {
+  background: #FFFCF7 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 20px rgba(107, 76, 59, 0.14) !important;
+  border: 1px solid rgba(242, 181, 192, 0.3) !important;
+  font-family: var(--font-body) !important;
+  padding: 6px !important;
+}
+
+.leaflet-popup-tip { background: #FFFCF7 !important; }
+.leaflet-popup-close-button { color: var(--brown-mid) !important; }
+
+.map-popup { text-align: center; }
+
+.map-popup img {
+  width: 100%;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--blush), var(--mauve));
+  display: block;
+}
+
+.map-popup-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--brown);
+  margin-bottom: 4px;
+}
+
+.map-popup-caption {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--brown-mid);
+}

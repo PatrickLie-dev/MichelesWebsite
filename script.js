@@ -191,7 +191,369 @@ function goToPage3() {
   setTimeout(() => {
     p2.classList.remove('active');
     p3.classList.add('active');
+    initPage3();
   }, 620);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PAGE 3 — Flower Bloom Transition
+// ════════════════════════════════════════════════════════════════
+// Rose color variants — predominantly white with the faintest warm-pink blush, zero purple
+const ROSE_VARIANTS = [
+  { o: '#FFFCFA', m: '#F8F0F2', i: '#F0E2E6', c: '#DEC0C8' }, // pure white
+  { o: '#FFF8F8', m: '#F8ECF0', i: '#F0D8DF', c: '#D8B0BC' }, // white blush
+  { o: '#FFFAF6', m: '#FAF0EC', i: '#F2E2DA', c: '#D8BAB0' }, // warm ivory
+  { o: '#FFF0F4', m: '#F8E2E8', i: '#EDD0D8', c: '#D4A8B4' }, // light blush
+  { o: '#FAF2F4', m: '#F4E4E8', i: '#EAD0D6', c: '#CCA8B0' }, // petal pink-white
+  { o: '#F5C8D4', m: '#EAB4C0', i: '#DCAAB6', c: '#C07888' }, // accent pink (one variant only)
+];
+
+function initPage3() {
+  const stage = document.getElementById('bloom-stage');
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  // Dense overlapping grid — cells smaller than flowers so nothing shows through
+  const CW = 54, CH = 48;
+  const cols = Math.ceil(W / CW) + 2;
+  const rows = Math.ceil(H / CH) + 2;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // Slight jitter per cell for organic positioning
+      const x = (c - 0.5) * CW + (Math.random() - 0.5) * CW * 0.5;
+      const y = (r - 0.5) * CH + (Math.random() - 0.5) * CH * 0.5;
+      // Delay: bottom rows bloom first, top rows last (rising wave)
+      const delay = ((rows - 1 - r) / rows) * 1.0 + Math.random() * 0.12;
+
+      const roll = Math.random();
+      let el;
+      if      (roll < 0.58) el = createRose(x, y, delay);
+      else if (roll < 0.82) el = createOpenLily(x, y, delay);
+      else                  el = createSmallBlossom(x, y, delay);
+      stage.appendChild(el);
+    }
+  }
+
+  setTimeout(goToPage4, 3800);
+}
+
+/* Shared bloom-in-place animation: scale 0→1 with spring overshoot */
+function applyBloom(el, delay, rot) {
+  const dur = 0.42 + Math.random() * 0.26;
+  el.style.transform  = `scale(0) rotate(${rot - 30}deg)`;
+  el.style.opacity    = '0';
+  el.style.transition =
+    `transform ${dur}s cubic-bezier(0.34, 1.4, 0.64, 1) ${delay}s, ` +
+    `opacity 0.18s ease ${delay}s`;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.style.transform = `scale(1) rotate(${rot}deg)`;
+      el.style.opacity   = '1';
+    });
+  });
+}
+
+/* Multi-ring rose: 3 concentric petal rings + bud center */
+function createRose(x, y, delay) {
+  const el     = document.createElement('div');
+  el.className = 'bloom-el';
+
+  const size = 58 + Math.random() * 26;
+  const v    = ROSE_VARIANTS[Math.floor(Math.random() * ROSE_VARIANTS.length)];
+  const rot  = (Math.random() - 0.5) * 60;
+
+  el.style.cssText = `
+    position:absolute; left:${x - size/2}px; top:${y - size/2}px;
+    width:${size}px; height:${size}px;
+    will-change:transform,opacity;
+    z-index:${1 + Math.floor(Math.random() * 4)};`;
+
+  el.innerHTML =
+    `<svg width="${size}" height="${size}" viewBox="0 0 80 80" fill="none">
+      <g transform="rotate(0   40 40)"><ellipse cx="40" cy="13" rx="11" ry="19" fill="${v.o}"/></g>
+      <g transform="rotate(72  40 40)"><ellipse cx="40" cy="13" rx="11" ry="19" fill="${v.o}" opacity=".93"/></g>
+      <g transform="rotate(144 40 40)"><ellipse cx="40" cy="13" rx="11" ry="19" fill="${v.o}"/></g>
+      <g transform="rotate(216 40 40)"><ellipse cx="40" cy="13" rx="11" ry="19" fill="${v.o}" opacity=".93"/></g>
+      <g transform="rotate(288 40 40)"><ellipse cx="40" cy="13" rx="11" ry="19" fill="${v.o}"/></g>
+      <g transform="rotate(36  40 40)"><ellipse cx="40" cy="20" rx="9"  ry="14" fill="${v.m}"/></g>
+      <g transform="rotate(108 40 40)"><ellipse cx="40" cy="20" rx="9"  ry="14" fill="${v.m}" opacity=".93"/></g>
+      <g transform="rotate(180 40 40)"><ellipse cx="40" cy="20" rx="9"  ry="14" fill="${v.m}"/></g>
+      <g transform="rotate(252 40 40)"><ellipse cx="40" cy="20" rx="9"  ry="14" fill="${v.m}" opacity=".93"/></g>
+      <g transform="rotate(324 40 40)"><ellipse cx="40" cy="20" rx="9"  ry="14" fill="${v.m}"/></g>
+      <g transform="rotate(18  40 40)"><ellipse cx="40" cy="27" rx="7"  ry="10" fill="${v.i}"/></g>
+      <g transform="rotate(90  40 40)"><ellipse cx="40" cy="27" rx="7"  ry="10" fill="${v.i}"/></g>
+      <g transform="rotate(162 40 40)"><ellipse cx="40" cy="27" rx="7"  ry="10" fill="${v.i}"/></g>
+      <g transform="rotate(234 40 40)"><ellipse cx="40" cy="27" rx="7"  ry="10" fill="${v.i}"/></g>
+      <g transform="rotate(306 40 40)"><ellipse cx="40" cy="27" rx="7"  ry="10" fill="${v.i}"/></g>
+      <ellipse cx="40" cy="37" rx="9" ry="11" fill="${v.i}"/>
+      <ellipse cx="40" cy="35" rx="6" ry="7"  fill="${v.c}"/>
+      <circle  cx="40" cy="40" r="4.5"         fill="${v.c}" opacity=".85"/>
+    </svg>`;
+
+  applyBloom(el, delay, rot);
+  return el;
+}
+
+/* Open lily: 6 long radiating petals with stamens */
+function createOpenLily(x, y, delay) {
+  const el     = document.createElement('div');
+  el.className = 'bloom-el';
+
+  const size = 50 + Math.random() * 22;
+  const v    = ROSE_VARIANTS[Math.floor(Math.random() * ROSE_VARIANTS.length)];
+  const rot  = (Math.random() - 0.5) * 60;
+
+  el.style.cssText = `
+    position:absolute; left:${x - size/2}px; top:${y - size/2}px;
+    width:${size}px; height:${size}px;
+    will-change:transform,opacity;
+    z-index:${1 + Math.floor(Math.random() * 4)};`;
+
+  el.innerHTML =
+    `<svg width="${size}" height="${size}" viewBox="0 0 80 80" fill="none">
+      <g transform="rotate(0   40 40)"><ellipse cx="40" cy="11" rx="9"  ry="21" fill="${v.o}"/></g>
+      <g transform="rotate(60  40 40)"><ellipse cx="40" cy="11" rx="9"  ry="21" fill="${v.m}"/></g>
+      <g transform="rotate(120 40 40)"><ellipse cx="40" cy="11" rx="9"  ry="21" fill="${v.o}"/></g>
+      <g transform="rotate(180 40 40)"><ellipse cx="40" cy="11" rx="9"  ry="21" fill="${v.m}"/></g>
+      <g transform="rotate(240 40 40)"><ellipse cx="40" cy="11" rx="9"  ry="21" fill="${v.o}"/></g>
+      <g transform="rotate(300 40 40)"><ellipse cx="40" cy="11" rx="9"  ry="21" fill="${v.m}"/></g>
+      <line x1="40" y1="32" x2="26" y2="17" stroke="#A8B89A" stroke-width="1.4"/>
+      <line x1="40" y1="32" x2="40" y2="14" stroke="#A8B89A" stroke-width="1.4"/>
+      <line x1="40" y1="32" x2="54" y2="17" stroke="#A8B89A" stroke-width="1.4"/>
+      <circle cx="26" cy="17" r="2.2" fill="#A8B89A"/>
+      <circle cx="40" cy="14" r="2.2" fill="#A8B89A"/>
+      <circle cx="54" cy="17" r="2.2" fill="#A8B89A"/>
+      <circle cx="40" cy="40" r="6"   fill="${v.c}"/>
+    </svg>`;
+
+  applyBloom(el, delay, rot);
+  return el;
+}
+
+/* Small 5-petal blossom — fills tight gaps between larger flowers */
+function createSmallBlossom(x, y, delay) {
+  const el     = document.createElement('div');
+  el.className = 'bloom-el';
+
+  const size = 32 + Math.random() * 18;
+  const v    = ROSE_VARIANTS[Math.floor(Math.random() * ROSE_VARIANTS.length)];
+  const rot  = (Math.random() - 0.5) * 60;
+
+  el.style.cssText = `
+    position:absolute; left:${x - size/2}px; top:${y - size/2}px;
+    width:${size}px; height:${size}px;
+    will-change:transform,opacity;
+    z-index:${Math.floor(Math.random() * 3)};`;
+
+  el.innerHTML =
+    `<svg width="${size}" height="${size}" viewBox="0 0 60 60" fill="none">
+      <g transform="rotate(0   30 30)"><ellipse cx="30" cy="10" rx="8" ry="14" fill="${v.o}"/></g>
+      <g transform="rotate(72  30 30)"><ellipse cx="30" cy="10" rx="8" ry="14" fill="${v.m}"/></g>
+      <g transform="rotate(144 30 30)"><ellipse cx="30" cy="10" rx="8" ry="14" fill="${v.o}"/></g>
+      <g transform="rotate(216 30 30)"><ellipse cx="30" cy="10" rx="8" ry="14" fill="${v.m}"/></g>
+      <g transform="rotate(288 30 30)"><ellipse cx="30" cy="10" rx="8" ry="14" fill="${v.o}"/></g>
+      <circle cx="30" cy="30" r="8"   fill="${v.c}"/>
+      <circle cx="30" cy="30" r="4.5" fill="${v.i}"/>
+    </svg>`;
+
+  applyBloom(el, delay, rot);
+  return el;
+}
+
+function goToPage4() {
+  const p3 = document.getElementById('page3');
+  const p4 = document.getElementById('page4');
+  p3.style.transition = 'opacity 0.85s ease';
+  p3.style.opacity    = '0';
+  setTimeout(() => {
+    p3.classList.remove('active');
+    p4.classList.add('active');
+    initPage4();
+  }, 700);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PAGE 4 — Scroll Journey
+// ════════════════════════════════════════════════════════════════
+function initPage4() {
+  spawnFloatingPetals(document.getElementById('petal-field-4'), 16);
+  initHeroWords();
+  initScrollFades();
+  initScratchObserver();
+  initMapObserver();
+
+  const btn = document.getElementById('p4-begin-btn');
+  btn.addEventListener('click',    beginPage4);
+  btn.addEventListener('touchend', e => { e.preventDefault(); beginPage4(); });
+}
+
+// ── Tap-to-begin + YouTube ───────────────────────────────────────
+function beginPage4() {
+  const overlay = document.getElementById('p4-begin');
+  overlay.style.transition = 'opacity 0.7s ease';
+  overlay.style.opacity    = '0';
+  setTimeout(() => { overlay.style.display = 'none'; }, 700);
+
+  document.getElementById('music-widget').classList.add('visible');
+
+  // Inject YouTube IFrame API (fires onYouTubeIframeAPIReady when loaded)
+  if (!window.YT) {
+    const tag  = document.createElement('script');
+    tag.src    = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  }
+}
+
+window.onYouTubeIframeAPIReady = function () {
+  // REPLACE [YOUTUBE_VIDEO_ID] — e.g. 'mPQ_V8vRPcE' for Wave to Earth - Love
+  const vid = '[YOUTUBE_VIDEO_ID]';
+  new YT.Player('yt-player', {
+    height: '1', width: '1',
+    videoId: vid,
+    playerVars: { autoplay: 1, loop: 1, playlist: vid, controls: 0 },
+    events: { onReady: e => e.target.playVideo() },
+  });
+};
+
+// ── Hero word-by-word reveal ─────────────────────────────────────
+function initHeroWords() {
+  const words = document.querySelectorAll('#hero-words .hero-word');
+  const date  = document.getElementById('hero-date');
+  words.forEach((w, i) => setTimeout(() => w.classList.add('visible'), 300 + i * 420));
+  setTimeout(() => date.classList.add('visible'), 300 + words.length * 420 + 150);
+}
+
+// ── Scroll fade-ups (IntersectionObserver on page4 container) ────
+function initScrollFades() {
+  const page4 = document.getElementById('page4');
+  const obs   = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { root: page4, threshold: 0.14 });
+  document.querySelectorAll('#page4 .fade-up').forEach(el => obs.observe(el));
+}
+
+// ── Scratch cards (lazy-init when section B enters view) ─────────
+function initScratchObserver() {
+  const page4 = document.getElementById('page4');
+  let done    = false;
+  const obs   = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !done) {
+      done = true;
+      obs.disconnect();
+      // Small delay so the polaroids are fully laid out before reading dimensions
+      setTimeout(() => {
+        document.querySelectorAll('.scratch-canvas').forEach(initScratchCanvas);
+      }, 120);
+    }
+  }, { root: page4, threshold: 0.08 });
+  obs.observe(document.getElementById('s-scratch'));
+}
+
+function initScratchCanvas(canvas) {
+  const win = canvas.parentElement;   // .scratch-window
+  const w   = win.offsetWidth  || 230;
+  const h   = win.offsetHeight || 230;
+  canvas.width  = w;
+  canvas.height = h;
+
+  const ctx = canvas.getContext('2d');
+
+  // Soft gradient scratch layer
+  const g = ctx.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0,   '#F8DCEA');
+  g.addColorStop(0.5, '#EEC4D8');
+  g.addColorStop(1,   '#B8C8B0');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+
+  // Hint text
+  ctx.fillStyle    = 'rgba(255,255,255,0.52)';
+  ctx.font         = `italic ${Math.round(w * 0.09)}px 'Playfair Display', Georgia, serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('scratch ✦', w / 2, h / 2);
+
+  let drawing = false, count = 0, revealed = false;
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const s = e.touches ? e.touches[0] : e;
+    return { x: s.clientX - r.left, y: s.clientY - r.top };
+  }
+
+  function scratch(x, y) {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 24, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (++count % 16 === 0 && !revealed) {
+      const d = ctx.getImageData(0, 0, w, h).data;
+      let t = 0;
+      for (let i = 3; i < d.length; i += 4) if (d[i] < 128) t++;
+      if (t / (w * h) > 0.55) {
+        revealed = true;
+        canvas.style.transition = 'opacity 0.6s ease';
+        canvas.style.opacity    = '0';
+      }
+    }
+  }
+
+  canvas.addEventListener('mousedown',  e => { drawing = true;  const p = getPos(e); scratch(p.x, p.y); });
+  canvas.addEventListener('mousemove',  e => { if (drawing) { const p = getPos(e); scratch(p.x, p.y); } });
+  canvas.addEventListener('mouseup',    () => drawing = false);
+  canvas.addEventListener('mouseleave', () => drawing = false);
+
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true;  const p = getPos(e); scratch(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchmove',  e => { e.preventDefault(); if (drawing) { const p = getPos(e); scratch(p.x, p.y); } }, { passive: false });
+  canvas.addEventListener('touchend',   () => drawing = false);
+}
+
+// ── Memory map (lazy-init when section D enters view) ────────────
+function initMapObserver() {
+  const page4 = document.getElementById('page4');
+  let done    = false;
+  const obs   = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !done) {
+      done = true;
+      obs.disconnect();
+      initLeafletMap();
+    }
+  }, { root: page4, threshold: 0.08 });
+  obs.observe(document.getElementById('s-map'));
+}
+
+function initLeafletMap() {
+  // ── REPLACE: your memory location coordinates [lat, lng] ──────
+  const COORDS = [3.1390, 101.6869];
+
+  const map = L.map('memory-map', {
+    center: COORDS, zoom: 15,
+    zoomControl: false, scrollWheelZoom: false, dragging: true,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://carto.com/">CartoDB</a>',
+    subdomains: 'abcd', maxZoom: 19,
+  }).addTo(map);
+
+  const icon = L.divIcon({
+    html: `<div style="
+      width:28px;height:28px;
+      background:linear-gradient(135deg,#F2B5C0,#C9A0B0);
+      border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+      border:3px solid white;
+      box-shadow:0 3px 12px rgba(201,160,176,0.55)"></div>`,
+    className: '', iconSize: [28,28], iconAnchor: [14,28], popupAnchor: [0,-34],
+  });
+
+  L.marker(COORDS, { icon }).addTo(map).bindPopup(`
+    <div class="map-popup">
+      <img src="[MEMORY_PHOTO]" alt="" onerror="this.style.display='none'">
+      <div class="map-popup-title">[MEMORY_LOCATION_NAME]</div>
+      <div class="map-popup-caption">[MEMORY_CAPTION]</div>
+    </div>`, { maxWidth: 210 });
 }
 
 // ════════════════════════════════════════════════════════════════
