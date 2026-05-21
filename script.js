@@ -426,9 +426,10 @@ function beginPage4() {
 
   document.getElementById('music-widget').classList.add('visible');
 
-  // Unmute synchronously inside the tap gesture — iOS requires this
+  // Restart from 0 then unmute synchronously inside tap gesture — iOS requires this
   _ytUnmutePending = true;
   if (_ytPlayer && typeof _ytPlayer.unMute === 'function') {
+    _ytPlayer.seekTo(0, true);
     _ytPlayer.unMute();
     _ytPlayer.setVolume(100);
     _ytPlayer.playVideo();
