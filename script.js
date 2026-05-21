@@ -376,19 +376,52 @@ function goToPage4() {
 // ════════════════════════════════════════════════════════════════
 //  PAGE 4 — Scroll Journey
 // ════════════════════════════════════════════════════════════════
+
+// YouTube state — pre-loaded before tap so playVideo() runs inside gesture context
+let _ytPlayer      = null;
+let _ytPlayPending = false;   // true once user has tapped begin
+
 function initPage4() {
   spawnFloatingPetals(document.getElementById('petal-field-4'), 16);
   initHeroWords();
   initScrollFades();
-  initScratchObserver();
   initMapObserver();
+  // Initialize canvases after layout settles — no lazy observer needed
+  setTimeout(() => {
+    document.querySelectorAll('.scratch-canvas').forEach(initScratchCanvas);
+  }, 300);
+
+  // Load the YT API NOW (while page 4 is fading in) so the player
+  // is ready by the time the user taps the begin button.
+  if (!window.YT && !document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+    const tag = document.createElement('script');
+    tag.src   = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  }
 
   const btn = document.getElementById('p4-begin-btn');
   btn.addEventListener('click',    beginPage4);
   btn.addEventListener('touchend', e => { e.preventDefault(); beginPage4(); });
 }
 
-// ── Tap-to-begin + YouTube ───────────────────────────────────────
+// Called once by YouTube SDK when it has loaded
+window.onYouTubeIframeAPIReady = function () {
+  const vid  = 'ZYBWv4vCZKI';
+  _ytPlayer  = new YT.Player('yt-player', {
+    height: '180', width: '320',
+    videoId: vid,
+    playerVars: { autoplay: 0, loop: 1, playlist: vid, controls: 0, mute: 0 },
+    events: {
+      onReady: () => {
+        _ytPlayer.setVolume(100);
+        // If user already tapped before the API finished loading, play now
+        if (_ytPlayPending) _ytPlayer.playVideo();
+      },
+    },
+  });
+};
+
+// ── Tap-to-begin ─────────────────────────────────────────────────
 function beginPage4() {
   const overlay = document.getElementById('p4-begin');
   overlay.style.transition = 'opacity 0.7s ease';
@@ -397,24 +430,13 @@ function beginPage4() {
 
   document.getElementById('music-widget').classList.add('visible');
 
-  // Inject YouTube IFrame API (fires onYouTubeIframeAPIReady when loaded)
-  if (!window.YT) {
-    const tag  = document.createElement('script');
-    tag.src    = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
+  // Mark play as requested — stays inside the user-gesture call stack
+  _ytPlayPending = true;
+  if (_ytPlayer && _ytPlayer.playVideo) {
+    _ytPlayer.playVideo();   // player already ready → play immediately ✓
   }
+  // If player not ready yet, onYouTubeIframeAPIReady → onReady will call it
 }
-
-window.onYouTubeIframeAPIReady = function () {
-  // REPLACE [YOUTUBE_VIDEO_ID] — e.g. 'mPQ_V8vRPcE' for Wave to Earth - Love
-  const vid = '[YOUTUBE_VIDEO_ID]';
-  new YT.Player('yt-player', {
-    height: '1', width: '1',
-    videoId: vid,
-    playerVars: { autoplay: 1, loop: 1, playlist: vid, controls: 0 },
-    events: { onReady: e => e.target.playVideo() },
-  });
-};
 
 // ── Hero word-by-word reveal ─────────────────────────────────────
 function initHeroWords() {
@@ -433,22 +455,6 @@ function initScrollFades() {
   document.querySelectorAll('#page4 .fade-up').forEach(el => obs.observe(el));
 }
 
-// ── Scratch cards (lazy-init when section B enters view) ─────────
-function initScratchObserver() {
-  const page4 = document.getElementById('page4');
-  let done    = false;
-  const obs   = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && !done) {
-      done = true;
-      obs.disconnect();
-      // Small delay so the polaroids are fully laid out before reading dimensions
-      setTimeout(() => {
-        document.querySelectorAll('.scratch-canvas').forEach(initScratchCanvas);
-      }, 120);
-    }
-  }, { root: page4, threshold: 0.08 });
-  obs.observe(document.getElementById('s-scratch'));
-}
 
 function initScratchCanvas(canvas) {
   const win = canvas.parentElement;   // .scratch-window
@@ -457,7 +463,7 @@ function initScratchCanvas(canvas) {
   canvas.width  = w;
   canvas.height = h;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
   // Soft gradient scratch layer
   const g = ctx.createLinearGradient(0, 0, w, h);
