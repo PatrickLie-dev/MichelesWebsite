@@ -377,49 +377,45 @@ function goToPage4() {
 //  PAGE 4 — Scroll Journey
 // ════════════════════════════════════════════════════════════════
 
-// YouTube state — pre-loaded before tap so playVideo() runs inside gesture context
-let _ytPlayer      = null;
-let _ytPlayPending = false;   // true once user has tapped begin
+// YouTube state
+let _ytPlayer     = null;
+let _ytUnmutePending = false;  // true once user has tapped begin
+
+// Called once by YouTube SDK when it has loaded (script in <head>)
+window.onYouTubeIframeAPIReady = function () {
+  const vid = 'ZYBWv4vCZKI';
+  _ytPlayer = new YT.Player('yt-player', {
+    height: '1', width: '1',
+    videoId: vid,
+    // mute:1 + autoplay:1 — muted autoplay is allowed on iOS/Android
+    // We unmute synchronously inside the tap gesture in beginPage4()
+    playerVars: { autoplay: 1, mute: 1, loop: 1, playlist: vid, controls: 0 },
+    events: {
+      onReady: (e) => {
+        e.target.playVideo();
+        // If user already tapped before player was ready, unmute now
+        if (_ytUnmutePending) {
+          e.target.unMute();
+          e.target.setVolume(100);
+        }
+      },
+    },
+  });
+};
 
 function initPage4() {
   spawnFloatingPetals(document.getElementById('petal-field-4'), 16);
   initHeroWords();
   initScrollFades();
   initMapObserver();
-  // Initialize canvases after layout settles — no lazy observer needed
   setTimeout(() => {
     document.querySelectorAll('.scratch-canvas').forEach(initScratchCanvas);
   }, 300);
-
-  // Load the YT API NOW (while page 4 is fading in) so the player
-  // is ready by the time the user taps the begin button.
-  if (!window.YT && !document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-    const tag = document.createElement('script');
-    tag.src   = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
-  }
 
   const btn = document.getElementById('p4-begin-btn');
   btn.addEventListener('click',    beginPage4);
   btn.addEventListener('touchend', e => { e.preventDefault(); beginPage4(); });
 }
-
-// Called once by YouTube SDK when it has loaded
-window.onYouTubeIframeAPIReady = function () {
-  const vid  = 'ZYBWv4vCZKI';
-  _ytPlayer  = new YT.Player('yt-player', {
-    height: '180', width: '320',
-    videoId: vid,
-    playerVars: { autoplay: 0, loop: 1, playlist: vid, controls: 0, mute: 0 },
-    events: {
-      onReady: () => {
-        _ytPlayer.setVolume(100);
-        // If user already tapped before the API finished loading, play now
-        if (_ytPlayPending) _ytPlayer.playVideo();
-      },
-    },
-  });
-};
 
 // ── Tap-to-begin ─────────────────────────────────────────────────
 function beginPage4() {
@@ -430,12 +426,14 @@ function beginPage4() {
 
   document.getElementById('music-widget').classList.add('visible');
 
-  // Mark play as requested — stays inside the user-gesture call stack
-  _ytPlayPending = true;
-  if (_ytPlayer && _ytPlayer.playVideo) {
-    _ytPlayer.playVideo();   // player already ready → play immediately ✓
+  // Unmute synchronously inside the tap gesture — iOS requires this
+  _ytUnmutePending = true;
+  if (_ytPlayer && typeof _ytPlayer.unMute === 'function') {
+    _ytPlayer.unMute();
+    _ytPlayer.setVolume(100);
+    _ytPlayer.playVideo();
   }
-  // If player not ready yet, onYouTubeIframeAPIReady → onReady will call it
+  // If player not ready yet, onReady will call unMute() via _ytUnmutePending
 }
 
 // ── Hero word-by-word reveal ─────────────────────────────────────
